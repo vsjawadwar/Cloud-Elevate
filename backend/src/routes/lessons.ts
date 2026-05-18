@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express'
+import { Router, Response } from 'express'
 import { supabase } from '../db/supabase'
 import { authenticate, requireAdmin, AuthRequest } from '../middleware/authenticate'
 
@@ -50,9 +50,13 @@ lessonsRouter.post('/', authenticate, requireAdmin, async (req: AuthRequest, res
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('[CREATE LESSON ERROR]', error)
+      return res.status(400).json({ error: error.message })
+    }
     res.status(201).json({ lesson })
-  } catch {
+  } catch (err) {
+    console.error('[CREATE LESSON EXCEPTION]', err)
     res.status(500).json({ error: 'Failed to create lesson' })
   }
 })

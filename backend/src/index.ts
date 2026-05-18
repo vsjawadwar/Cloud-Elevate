@@ -6,6 +6,7 @@ import morgan       from 'morgan'
 
 import { authRouter     } from './routes/auth'
 import { coursesRouter  } from './routes/courses'
+import { modulesRouter  } from './routes/modules'
 import { lessonsRouter  } from './routes/lessons'
 import { quizRouter     } from './routes/quiz'
 import { paymentsRouter } from './routes/payments'
@@ -46,6 +47,7 @@ app.get('/health', (_req, res) => {
 // ── Routes ────────────────────────────────────
 app.use('/api/auth',     authRouter)
 app.use('/api/courses',  coursesRouter)
+app.use('/api/modules',  modulesRouter)
 app.use('/api/lessons',  lessonsRouter)
 app.use('/api/quiz',     quizRouter)
 app.use('/api/payments', paymentsRouter)

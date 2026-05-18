@@ -80,16 +80,27 @@ coursesRouter.post('/', authenticate, requireAdmin, async (req: AuthRequest, res
     const { data: course, error } = await supabase
       .from('courses')
       .insert({
-        title, description, short_description, price,
-        original_price, thumbnail_url, level, language,
-        total_duration_mins, is_published: false
+        title,
+        description,
+        short_description,
+        price:               Number(price),
+        original_price:      original_price ? Number(original_price) : null,
+        thumbnail_url:       thumbnail_url || null,
+        level,
+        language,
+        total_duration_mins: Number(total_duration_mins) || 0,
+        is_published:        false
       })
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('[CREATE COURSE ERROR]', error)
+      return res.status(400).json({ error: error.message })
+    }
     res.status(201).json({ course })
-  } catch {
+  } catch (err) {
+    console.error('[CREATE COURSE EXCEPTION]', err)
     res.status(500).json({ error: 'Failed to create course' })
   }
 })

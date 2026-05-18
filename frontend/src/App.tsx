@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from '@/lib/store/authStore'
+import { api } from '@/lib/api'
 
 // Pages
 import Landing        from '@/pages/Landing'
@@ -19,20 +21,50 @@ import AdminStudents  from '@/pages/admin/AdminStudents'
 import AdminCourses   from '@/pages/admin/AdminCourses'
 import NotFound       from '@/pages/NotFound'
 
+// Restore auth state from token on every page load
+function useInitAuth() {
+  const { token, setAuth, clearAuth, setReady } = useAuthStore()
+
+  useEffect(() => {
+    if (!token) {
+      setReady(true)
+      return
+    }
+    api.get('/api/auth/me')
+      .then(({ data }) => {
+        // Decode isAdmin from the JWT payload (middle section)
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]))
+          setAuth(data.user, token, payload.isAdmin ?? false)
+        } catch {
+          setAuth(data.user, token, false)
+        }
+      })
+      .catch(() => {
+        // Token is expired or invalid — log out silently
+        clearAuth()
+      })
+  }, []) // run once on mount
+}
+
 // Route guards
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuthStore()
+  const { user, ready } = useAuthStore()
+  if (!ready) return <div className="min-h-screen flex items-center justify-center text-slate-500">Loading…</div>
   return user ? <>{children}</> : <Navigate to="/login" replace />
 }
 
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isAdmin } = useAuthStore()
-  if (!user) return <Navigate to="/login" replace />
+  const { user, isAdmin, ready } = useAuthStore()
+  if (!ready) return <div className="min-h-screen flex items-center justify-center text-slate-500">Loading…</div>
+  if (!user)    return <Navigate to="/login" replace />
   if (!isAdmin) return <Navigate to="/dashboard" replace />
   return <>{children}</>
 }
 
 export default function App() {
+  useInitAuth()
+
   return (
     <Routes>
       {/* Public routes */}
@@ -52,7 +84,7 @@ export default function App() {
 
       {/* Admin routes */}
       <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-        <Route index         element={<AdminDashboard />} />
+        <Route index           element={<AdminDashboard />} />
         <Route path="students" element={<AdminStudents />} />
         <Route path="courses"  element={<AdminCourses />} />
       </Route>

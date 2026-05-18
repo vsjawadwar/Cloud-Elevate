@@ -1,8 +1,9 @@
-import { Router, Request, Response } from 'express'
+import { Router, Response } from 'express'
 import Razorpay from 'razorpay'
 import crypto   from 'crypto'
 import { supabase } from '../db/supabase'
 import { authenticate, AuthRequest } from '../middleware/authenticate'
+import { sendEnrollmentEmail } from '../lib/email'
 
 export const paymentsRouter = Router()
 
@@ -111,6 +112,14 @@ paymentsRouter.post('/verify', authenticate, async (req: AuthRequest, res: Respo
       })
       .select()
       .single()
+
+    // Send confirmation email (non-blocking)
+    Promise.all([
+      supabase.from('users').select('name').eq('id', req.user!.id).single(),
+      supabase.from('courses').select('title').eq('id', courseId).single()
+    ]).then(([{ data: u }, { data: c }]) => {
+      if (u && c) sendEnrollmentEmail(req.user!.email, u.name, c.title)
+    }).catch(() => {})
 
     res.json({
       success:    true,

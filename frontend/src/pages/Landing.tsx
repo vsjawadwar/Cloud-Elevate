@@ -66,9 +66,9 @@ const features = [
 
 const stats = [
   { value: '2,000+', label: 'Students Enrolled' },
-  { value: '92%', label: 'Pass Rate' },
-  { value: '15+', label: 'Video Hours' },
-  { value: '₹999', label: 'Starting Price' }
+  { value: '92%',    label: 'Pass Rate' },
+  { value: '15+',    label: 'Video Hours' },
+  { value: '₹999',  label: 'Starting Price' }
 ]
 
 export default function Landing() {
@@ -76,8 +76,8 @@ export default function Landing() {
     <div className="min-h-screen">
       <Navbar />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden pt-20 pb-28">
+      {/* Hero — always dark for brand impact */}
+      <section className="relative overflow-hidden pt-20 pb-28 bg-slate-950">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-950 via-slate-950 to-slate-950" />
         <div className="absolute inset-0 opacity-20"
           style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, #3b82f6 0%, transparent 50%), radial-gradient(circle at 70% 20%, #1d4ed8 0%, transparent 40%)' }} />
@@ -102,7 +102,8 @@ export default function Landing() {
             <Link to="/courses" className="btn-primary text-base w-full sm:w-auto">
               Explore Courses
             </Link>
-            <Link to="/register" className="btn-secondary text-base w-full sm:w-auto">
+            <Link to="/register"
+              className="bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 text-base w-full sm:w-auto text-center">
               Start Free Today
             </Link>
           </div>
@@ -110,13 +111,13 @@ export default function Landing() {
       </section>
 
       {/* Stats */}
-      <section className="border-y border-slate-800 bg-slate-900">
+      <section className="border-y border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((s) => (
               <div key={s.label} className="text-center">
-                <div className="text-3xl font-bold text-white mb-1">{s.value}</div>
-                <div className="text-sm text-slate-400">{s.label}</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{s.value}</div>
+                <div className="text-sm text-gray-500 dark:text-slate-400">{s.label}</div>
               </div>
             ))}
           </div>
@@ -127,20 +128,20 @@ export default function Landing() {
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-white mb-4">Everything you need to pass</h2>
-            <p className="text-slate-400 max-w-xl mx-auto">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Everything you need to pass</h2>
+            <p className="text-gray-500 dark:text-slate-400 max-w-xl mx-auto">
               A complete learning system — not just videos. Built specifically for the GCP exam.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((f) => (
-              <div key={f.title} className="card hover:border-slate-700 transition-colors">
-                <div className="w-12 h-12 bg-blue-950 border border-blue-900 rounded-xl flex items-center justify-center text-blue-400 mb-4">
+              <div key={f.title} className="card hover:shadow-md dark:hover:border-slate-700 transition-all">
+                <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950 border border-blue-100 dark:border-blue-900 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400 mb-4">
                   {f.icon}
                 </div>
-                <h3 className="text-white font-semibold text-lg mb-2">{f.title}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{f.desc}</p>
+                <h3 className="text-gray-900 dark:text-white font-semibold text-lg mb-2">{f.title}</h3>
+                <p className="text-gray-500 dark:text-slate-400 text-sm leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -148,22 +149,23 @@ export default function Landing() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-slate-900 border-t border-slate-800">
+      <section className="py-20 bg-blue-600">
         <div className="max-w-2xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Ready to start your cloud journey?</h2>
-          <p className="text-slate-400 mb-8">
+          <p className="text-blue-100 mb-8">
             Join thousands of students who've already taken the first step toward a GCP certification.
           </p>
-          <Link to="/register" className="btn-primary text-base">
+          <Link to="/register"
+            className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-8 py-3 rounded-lg transition-colors inline-block text-base">
             Create Free Account
           </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 py-8">
-        <div className="max-w-7xl mx-auto px-4 text-center text-slate-500 text-sm">
-          © {new Date().getFullYear()} Cloud Elevate. Made with ♥ for diploma students in India.
+      <footer className="border-t border-gray-200 dark:border-slate-800 py-8 bg-white dark:bg-slate-900">
+        <div className="max-w-7xl mx-auto px-4 text-center text-gray-400 dark:text-slate-500 text-sm">
+          © {new Date().getFullYear()} Cloud Elevate. Empowering cloud careers across India.
         </div>
       </footer>
     </div>

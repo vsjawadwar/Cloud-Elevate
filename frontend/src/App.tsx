@@ -19,6 +19,7 @@ import AdminLayout    from '@/pages/admin/AdminLayout'
 import AdminDashboard from '@/pages/admin/AdminDashboard'
 import AdminStudents  from '@/pages/admin/AdminStudents'
 import AdminCourses   from '@/pages/admin/AdminCourses'
+import Profile        from '@/pages/Profile'
 import NotFound       from '@/pages/NotFound'
 
 // Restore auth state from token on every page load
@@ -81,6 +82,7 @@ export default function App() {
       <Route path="/quiz/:quizId"       element={<PrivateRoute><Quiz /></PrivateRoute>} />
       <Route path="/quiz/:quizId/result/:attemptId" element={<PrivateRoute><QuizResult /></PrivateRoute>} />
       <Route path="/certificate/:enrollmentId"      element={<PrivateRoute><Certificate /></PrivateRoute>} />
+      <Route path="/profile"                        element={<PrivateRoute><Profile /></PrivateRoute>} />
 
       {/* Admin routes */}
       <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>

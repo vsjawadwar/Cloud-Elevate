@@ -11,8 +11,8 @@ authRouter.post('/register', async (req: Request, res: Response) => {
   try {
     const { name, email, password, phone } = req.body
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Name, email and password are required' })
+    if (!name || !email || !password || !phone) {
+      return res.status(400).json({ error: 'Name, email, phone and password are required' })
     }
 
     // Create user in Supabase Auth
@@ -149,6 +149,26 @@ authRouter.get('/me', authenticate, async (req: AuthRequest, res: Response) => {
     res.json({ user })
   } catch {
     res.status(500).json({ error: 'Failed to fetch user' })
+  }
+})
+
+// ── Update profile ────────────────────────────
+authRouter.patch('/profile', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { name, phone } = req.body
+    if (!name) return res.status(400).json({ error: 'Name is required' })
+
+    const { data: user, error } = await supabase
+      .from('users')
+      .update({ name, phone: phone || null })
+      .eq('id', req.user!.id)
+      .select('id, name, email, phone, avatar_url, created_at')
+      .single()
+
+    if (error) throw error
+    res.json({ user })
+  } catch {
+    res.status(500).json({ error: 'Failed to update profile' })
   }
 })
 

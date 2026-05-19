@@ -25,8 +25,19 @@ app.use(helmet())
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'))
 
 // ── CORS ──────────────────────────────────────
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://thecloudelevate.in',
+  'https://www.thecloudelevate.in',
+  'https://thecloudelevate.com',
+  'https://www.thecloudelevate.com',
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
+]
 app.use(cors({
-  origin:      process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true)
+    cb(new Error(`CORS: origin ${origin} not allowed`))
+  },
   credentials: true,
   methods:     ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
 }))

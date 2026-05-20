@@ -240,7 +240,7 @@ authRouter.post('/verify-reset-otp', async (req: Request, res: Response) => {
     console.log(`[OTP VERIFY] record=${JSON.stringify(record)} error=${JSON.stringify(dbError)}`)
 
     if (!record) return res.status(400).json({ error: 'Invalid OTP. Please check and try again.' })
-    if (record.otp !== cleanOtp) return res.status(400).json({ error: 'Invalid OTP. Please check and try again.' })
+    if (String(record.otp) !== cleanOtp) return res.status(400).json({ error: 'Invalid OTP. Please check and try again.' })
     if (new Date(record.expires_at) < new Date()) {
       return res.status(400).json({ error: 'OTP has expired. Please request a new one.' })
     }
@@ -268,11 +268,14 @@ authRouter.post('/reset-password', async (req: Request, res: Response) => {
       .from('password_reset_otps')
       .select('*')
       .eq('email', email.toLowerCase().trim())
-      .eq('otp', otp)
       .eq('used', false)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .single()
 
-    if (!record) return res.status(400).json({ error: 'Invalid or expired OTP.' })
+    if (!record || String(record.otp) !== otp.toString().trim()) {
+      return res.status(400).json({ error: 'Invalid or expired OTP.' })
+    }
     if (new Date(record.expires_at) < new Date()) {
       return res.status(400).json({ error: 'OTP has expired. Please request a new one.' })
     }

@@ -9,7 +9,7 @@ async function send(to: string, subject: string, html: string) {
   }
   try {
     await resend.emails.send({
-      from: 'Cloud Elevate <noreply@thecloudelevate.in>',
+      from: process.env.RESEND_FROM || 'Cloud Elevate <noreply@thecloudelevate.in>',
       to,
       subject,
       html

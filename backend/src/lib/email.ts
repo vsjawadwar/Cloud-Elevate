@@ -55,6 +55,117 @@ export async function sendEnrollmentEmail(to: string, name: string, courseTitle:
   await send(to, subject, html)
 }
 
+export async function sendWelcomeEmail(to: string, name: string) {
+  const subject = `Welcome to Cloud Elevate, ${name.split(' ')[0]}!`
+  const html = `
+    <div style="font-family:sans-serif;max-width:560px;margin:auto;background:#0f172a;color:#e2e8f0;padding:32px;border-radius:12px">
+      <div style="margin-bottom:24px">
+        <span style="background:#2563eb;color:#fff;padding:6px 14px;border-radius:8px;font-weight:700;font-size:14px">Cloud Elevate</span>
+      </div>
+      <h1 style="color:#fff;font-size:24px;margin:0 0 12px">Welcome aboard, ${name.split(' ')[0]}! 👋</h1>
+      <p style="color:#94a3b8;line-height:1.7;margin:0 0 16px">
+        Your Cloud Elevate account is ready. You now have access to industry-leading certification courses
+        designed to help you upskill, get certified, and grow your career.
+      </p>
+      <p style="color:#94a3b8;line-height:1.7;margin:0 0 24px">
+        Browse our courses, enroll, and start learning at your own pace — with lifetime access to everything you buy.
+      </p>
+      <a href="${process.env.FRONTEND_URL}/courses"
+        style="background:#2563eb;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block;margin-bottom:24px">
+        Browse Courses →
+      </a>
+      <div style="background:#1e293b;border-radius:10px;padding:20px;margin-bottom:24px">
+        <p style="color:#94a3b8;font-size:13px;margin:0 0 10px;font-weight:600">What's included with every course:</p>
+        <ul style="color:#64748b;font-size:13px;margin:0;padding-left:18px;line-height:2">
+          <li>HD video lessons with lifetime access</li>
+          <li>Practice quizzes &amp; mock exams</li>
+          <li>Verified completion certificate</li>
+        </ul>
+      </div>
+      <p style="color:#475569;font-size:12px;margin:0">Cloud Elevate — Upskill. Certify. Succeed.</p>
+    </div>
+  `
+  await send(to, subject, html)
+}
+
+export async function sendCourseCompletionEmail(
+  to: string,
+  name: string,
+  courseTitle: string,
+  enrollmentId: string
+) {
+  const subject = `You completed "${courseTitle}" — Claim your certificate!`
+  const html = `
+    <div style="font-family:sans-serif;max-width:560px;margin:auto;background:#0f172a;color:#e2e8f0;padding:32px;border-radius:12px">
+      <div style="margin-bottom:24px">
+        <span style="background:#2563eb;color:#fff;padding:6px 14px;border-radius:8px;font-weight:700;font-size:14px">Cloud Elevate</span>
+      </div>
+      <div style="text-align:center;padding:24px 0">
+        <div style="font-size:48px;margin-bottom:12px">🏆</div>
+        <h1 style="color:#fff;font-size:24px;margin:0 0 8px">Course Completed!</h1>
+        <p style="color:#94a3b8;margin:0">You did it, ${name.split(' ')[0]}!</p>
+      </div>
+      <p style="color:#94a3b8;line-height:1.7;margin:0 0 8px">
+        Congratulations on completing <strong style="color:#fff">${courseTitle}</strong>.
+        Your verified certificate is ready to download and share.
+      </p>
+      <p style="color:#94a3b8;line-height:1.7;margin:0 0 24px">
+        Add it to your LinkedIn profile, resume, or share it with your network to showcase your achievement.
+      </p>
+      <a href="${process.env.FRONTEND_URL}/certificate/${enrollmentId}"
+        style="background:#16a34a;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block;margin-bottom:24px">
+        Download Certificate →
+      </a>
+      <p style="color:#475569;font-size:12px;margin:0">Cloud Elevate — Upskill. Certify. Succeed.</p>
+    </div>
+  `
+  await send(to, subject, html)
+}
+
+export async function sendAdminPurchaseAlert(
+  adminEmail: string,
+  studentName: string,
+  studentEmail: string,
+  courseTitle: string,
+  amountINR: number
+) {
+  const subject = `New Purchase — ₹${amountINR} from ${studentName}`
+  const html = `
+    <div style="font-family:sans-serif;max-width:560px;margin:auto;background:#0f172a;color:#e2e8f0;padding:32px;border-radius:12px">
+      <div style="margin-bottom:24px">
+        <span style="background:#2563eb;color:#fff;padding:6px 14px;border-radius:8px;font-weight:700;font-size:14px">Cloud Elevate Admin</span>
+      </div>
+      <h1 style="color:#fff;font-size:20px;margin:0 0 20px">New Course Purchase 💰</h1>
+      <div style="background:#1e293b;border-radius:10px;padding:20px;margin-bottom:24px">
+        <table style="width:100%;border-collapse:collapse;font-size:14px">
+          <tr>
+            <td style="color:#64748b;padding:6px 0">Student</td>
+            <td style="color:#fff;text-align:right;padding:6px 0">${studentName}</td>
+          </tr>
+          <tr>
+            <td style="color:#64748b;padding:6px 0">Email</td>
+            <td style="color:#fff;text-align:right;padding:6px 0">${studentEmail}</td>
+          </tr>
+          <tr>
+            <td style="color:#64748b;padding:6px 0">Course</td>
+            <td style="color:#fff;text-align:right;padding:6px 0">${courseTitle}</td>
+          </tr>
+          <tr style="border-top:1px solid #334155">
+            <td style="color:#22c55e;padding:10px 0 4px;font-weight:700">Amount Received</td>
+            <td style="color:#22c55e;text-align:right;padding:10px 0 4px;font-weight:700;font-size:18px">₹${amountINR}</td>
+          </tr>
+        </table>
+      </div>
+      <a href="${process.env.FRONTEND_URL}/admin/students"
+        style="background:#2563eb;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
+        View in Admin Panel →
+      </a>
+      <p style="color:#475569;font-size:12px;margin-top:28px">${new Date().toLocaleString('en-IN', { dateStyle: 'full', timeStyle: 'short' })}</p>
+    </div>
+  `
+  await send(adminEmail, subject, html)
+}
+
 export async function sendOtpEmail(to: string, name: string, otp: string) {
   const subject = 'Your Password Reset OTP — Cloud Elevate'
   const html = `

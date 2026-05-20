@@ -3,7 +3,7 @@ import jwt    from 'jsonwebtoken'
 import axios  from 'axios'
 import { supabase }     from '../db/supabase'
 import { authenticate, AuthRequest } from '../middleware/authenticate'
-import { sendOtpEmail } from '../lib/email'
+import { sendOtpEmail, sendWelcomeEmail } from '../lib/email'
 
 export const authRouter = Router()
 
@@ -43,6 +43,9 @@ authRouter.post('/register', async (req: Request, res: Response) => {
     if (userError) {
       return res.status(400).json({ error: userError.message })
     }
+
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(email, name).catch(() => {})
 
     res.status(201).json({ message: 'Account created successfully', user })
 

@@ -1,7 +1,7 @@
 import { Router, Response } from 'express'
 import { supabase } from '../db/supabase'
 import { authenticate, AuthRequest } from '../middleware/authenticate'
-import { sendModuleCompletionEmail } from '../lib/email'
+import { sendModuleCompletionEmail, sendCourseCompletionEmail } from '../lib/email'
 
 export const progressRouter = Router()
 
@@ -79,6 +79,34 @@ async function checkModuleCompletion(userId: string, userEmail: string, lessonId
 
   if (user && mod?.title && course?.title && course?.id) {
     await sendModuleCompletionEmail(userEmail, user.name, mod.title, course.title, course.id)
+
+    // Check if entire course is now complete
+    const { data: allCourseLessons } = await supabase
+      .from('lessons')
+      .select('id, modules!inner(course_id)')
+      .eq('modules.course_id', course.id)
+
+    if (allCourseLessons?.length) {
+      const { data: allCompleted } = await supabase
+        .from('lesson_progress')
+        .select('lesson_id')
+        .eq('user_id', userId)
+        .eq('completed', true)
+        .in('lesson_id', allCourseLessons.map((l: any) => l.id))
+
+      if (allCompleted?.length === allCourseLessons.length) {
+        const { data: enrollment } = await supabase
+          .from('enrollments')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('course_id', course.id)
+          .single()
+
+        if (enrollment) {
+          await sendCourseCompletionEmail(userEmail, user.name, course.title, enrollment.id)
+        }
+      }
+    }
   }
 }
 

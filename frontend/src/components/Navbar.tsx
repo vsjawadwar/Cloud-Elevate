@@ -42,13 +42,16 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+            <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center shadow-sm shadow-blue-300 dark:shadow-blue-900">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24">
+                <path fill="white" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
+                <path stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M20 19v-8m0 0-2 2m2-2 2 2"/>
               </svg>
             </div>
-            <span className="text-gray-900 dark:text-white font-bold text-lg">Cloud Elevate</span>
+            <div className="flex flex-col leading-none">
+              <span className="text-gray-900 dark:text-white font-bold text-base tracking-tight">Cloud Elevate</span>
+              <span className="text-blue-500 dark:text-blue-400 text-[10px] font-semibold tracking-widest uppercase mt-0.5">GCP Courses</span>
+            </div>
           </Link>
 
           {/* Nav links */}

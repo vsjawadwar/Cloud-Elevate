@@ -36,7 +36,8 @@ adminRouter.get('/students', async (_req: AuthRequest, res: Response) => {
       .from('users')
       .select(`
         id, name, email, phone, created_at,
-        enrollments ( id, course_id, enrolled_at )
+        enrollments ( id, course_id, enrolled_at ),
+        user_sessions ( id, created_at, last_seen_at, is_active, device_info, ip_address, city )
       `)
       .eq('is_admin', false)
       .order('created_at', { ascending: false })
@@ -44,6 +45,22 @@ adminRouter.get('/students', async (_req: AuthRequest, res: Response) => {
     res.json({ students })
   } catch {
     res.status(500).json({ error: 'Failed to fetch students' })
+  }
+})
+
+// ── Student login activity ────────────────────
+adminRouter.get('/students/:id/activity', async (req: AuthRequest, res: Response) => {
+  try {
+    const { data: sessions } = await supabase
+      .from('user_sessions')
+      .select('id, created_at, last_seen_at, is_active, device_info, ip_address, city')
+      .eq('user_id', req.params.id)
+      .order('created_at', { ascending: false })
+      .limit(30)
+
+    res.json({ sessions: sessions || [] })
+  } catch {
+    res.status(500).json({ error: 'Failed to fetch activity' })
   }
 })
 

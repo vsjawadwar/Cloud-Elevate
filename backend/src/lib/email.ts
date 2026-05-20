@@ -55,6 +55,33 @@ export async function sendEnrollmentEmail(to: string, name: string, courseTitle:
   await send(to, subject, html)
 }
 
+export async function sendOtpEmail(to: string, name: string, otp: string) {
+  const subject = 'Your Password Reset OTP — Cloud Elevate'
+  const html = `
+    <div style="font-family:sans-serif;max-width:560px;margin:auto;background:#0f172a;color:#e2e8f0;padding:32px;border-radius:12px">
+      <div style="margin-bottom:24px">
+        <span style="background:#2563eb;color:#fff;padding:6px 14px;border-radius:8px;font-weight:700;font-size:14px">
+          Cloud Elevate
+        </span>
+      </div>
+      <h1 style="color:#fff;font-size:22px;margin:0 0 12px">Reset Your Password</h1>
+      <p style="color:#94a3b8;line-height:1.6;margin:0 0 24px">
+        Hi ${name}, use the OTP below to reset your password. It expires in <strong style="color:#fff">10 minutes</strong>.
+      </p>
+      <div style="background:#1e293b;border:2px dashed #2563eb;border-radius:12px;padding:28px;text-align:center;margin-bottom:24px">
+        <div style="font-size:40px;font-weight:700;letter-spacing:14px;color:#fff;font-family:monospace">${otp}</div>
+      </div>
+      <p style="color:#64748b;font-size:13px;margin:0">
+        If you did not request this, ignore this email. Your password remains unchanged.
+      </p>
+      <p style="color:#475569;font-size:12px;margin-top:32px">
+        Cloud Elevate — Upskill. Certify. Succeed.
+      </p>
+    </div>
+  `
+  await send(to, subject, html)
+}
+
 export async function sendModuleCompletionEmail(
   to: string,
   name: string,

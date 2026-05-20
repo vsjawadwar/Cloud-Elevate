@@ -3,6 +3,7 @@ import jwt    from 'jsonwebtoken'
 import axios  from 'axios'
 import { supabase }     from '../db/supabase'
 import { authenticate, AuthRequest } from '../middleware/authenticate'
+import { sendOtpEmail } from '../lib/email'
 
 export const authRouter = Router()
 
@@ -169,6 +170,114 @@ authRouter.patch('/profile', authenticate, async (req: AuthRequest, res: Respons
     res.json({ user })
   } catch {
     res.status(500).json({ error: 'Failed to update profile' })
+  }
+})
+
+// ── Forgot Password — Send OTP ────────────────
+authRouter.post('/forgot-password', async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body
+    if (!email) return res.status(400).json({ error: 'Email is required' })
+
+    const { data: user } = await supabase
+      .from('users')
+      .select('id, name')
+      .eq('email', email.toLowerCase().trim())
+      .single()
+
+    // Always return same message — don't reveal if email exists
+    if (!user) {
+      return res.json({ message: 'If this email is registered, an OTP has been sent.' })
+    }
+
+    const otp       = Math.floor(100000 + Math.random() * 900000).toString()
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
+
+    // Remove any existing OTPs for this email
+    await supabase.from('password_reset_otps').delete().eq('email', email)
+
+    await supabase.from('password_reset_otps').insert({
+      email: email.toLowerCase().trim(),
+      otp,
+      expires_at: expiresAt,
+      used: false
+    })
+
+    await sendOtpEmail(email, user.name, otp)
+
+    res.json({ message: 'If this email is registered, an OTP has been sent.' })
+  } catch {
+    res.status(500).json({ error: 'Failed to send OTP' })
+  }
+})
+
+// ── Verify Reset OTP ──────────────────────────
+authRouter.post('/verify-reset-otp', async (req: Request, res: Response) => {
+  try {
+    const { email, otp } = req.body
+    if (!email || !otp) return res.status(400).json({ error: 'Email and OTP are required' })
+
+    const { data: record } = await supabase
+      .from('password_reset_otps')
+      .select('*')
+      .eq('email', email.toLowerCase().trim())
+      .eq('otp', otp)
+      .eq('used', false)
+      .single()
+
+    if (!record) return res.status(400).json({ error: 'Invalid OTP. Please check and try again.' })
+    if (new Date(record.expires_at) < new Date()) {
+      return res.status(400).json({ error: 'OTP has expired. Please request a new one.' })
+    }
+
+    res.json({ valid: true })
+  } catch {
+    res.status(500).json({ error: 'Failed to verify OTP' })
+  }
+})
+
+// ── Reset Password ────────────────────────────
+authRouter.post('/reset-password', async (req: Request, res: Response) => {
+  try {
+    const { email, otp, newPassword } = req.body
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ error: 'Email, OTP and new password are required' })
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' })
+    }
+
+    // Re-verify OTP before resetting
+    const { data: record } = await supabase
+      .from('password_reset_otps')
+      .select('*')
+      .eq('email', email.toLowerCase().trim())
+      .eq('otp', otp)
+      .eq('used', false)
+      .single()
+
+    if (!record) return res.status(400).json({ error: 'Invalid or expired OTP.' })
+    if (new Date(record.expires_at) < new Date()) {
+      return res.status(400).json({ error: 'OTP has expired. Please request a new one.' })
+    }
+
+    // Get Supabase Auth user
+    const { data: { users } } = await supabase.auth.admin.listUsers()
+    const authUser = users.find(u => u.email === email.toLowerCase().trim())
+    if (!authUser) return res.status(404).json({ error: 'User not found' })
+
+    // Update password
+    const { error: updateError } = await supabase.auth.admin.updateUserById(authUser.id, {
+      password: newPassword
+    })
+    if (updateError) throw updateError
+
+    // Mark OTP as used
+    await supabase.from('password_reset_otps').update({ used: true }).eq('id', record.id)
+
+    res.json({ message: 'Password reset successfully. Please login with your new password.' })
+  } catch {
+    res.status(500).json({ error: 'Failed to reset password' })
   }
 })
 

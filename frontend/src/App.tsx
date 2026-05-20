@@ -20,6 +20,7 @@ import AdminDashboard from '@/pages/admin/AdminDashboard'
 import AdminStudents  from '@/pages/admin/AdminStudents'
 import AdminCourses   from '@/pages/admin/AdminCourses'
 import Profile        from '@/pages/Profile'
+import ForgotPassword from '@/pages/ForgotPassword'
 import NotFound       from '@/pages/NotFound'
 
 // Restore auth state from token on every page load
@@ -71,7 +72,8 @@ export default function App() {
       {/* Public routes */}
       <Route path="/"               element={<Landing />} />
       <Route path="/login"          element={<Login />} />
-      <Route path="/register"       element={<Register />} />
+      <Route path="/register"        element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/courses"        element={<Courses />} />
       <Route path="/courses/:id"    element={<CourseDetail />} />
 

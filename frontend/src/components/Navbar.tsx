@@ -50,7 +50,7 @@ export default function Navbar() {
             </div>
             <div className="flex flex-col leading-none">
               <span className="text-gray-900 dark:text-white font-bold text-base tracking-tight">Cloud Elevate</span>
-              <span className="text-blue-500 dark:text-blue-400 text-[10px] font-semibold tracking-widest uppercase mt-0.5">GCP Courses</span>
+              <span className="text-blue-500 dark:text-blue-400 text-[10px] font-semibold tracking-widest uppercase mt-0.5">Upskill. Certify. Succeed.</span>
             </div>
           </Link>
 

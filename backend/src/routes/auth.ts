@@ -223,21 +223,31 @@ authRouter.post('/verify-reset-otp', async (req: Request, res: Response) => {
     const { email, otp } = req.body
     if (!email || !otp) return res.status(400).json({ error: 'Email and OTP are required' })
 
-    const { data: record } = await supabase
+    const cleanEmail = email.toLowerCase().trim()
+    const cleanOtp   = otp.toString().trim()
+
+    console.log(`[OTP VERIFY] email=${cleanEmail} otp=${cleanOtp}`)
+
+    const { data: record, error: dbError } = await supabase
       .from('password_reset_otps')
       .select('*')
-      .eq('email', email.toLowerCase().trim())
-      .eq('otp', otp)
+      .eq('email', cleanEmail)
       .eq('used', false)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .single()
 
+    console.log(`[OTP VERIFY] record=${JSON.stringify(record)} error=${JSON.stringify(dbError)}`)
+
     if (!record) return res.status(400).json({ error: 'Invalid OTP. Please check and try again.' })
+    if (record.otp !== cleanOtp) return res.status(400).json({ error: 'Invalid OTP. Please check and try again.' })
     if (new Date(record.expires_at) < new Date()) {
       return res.status(400).json({ error: 'OTP has expired. Please request a new one.' })
     }
 
     res.json({ valid: true })
-  } catch {
+  } catch (err) {
+    console.error('[OTP VERIFY ERROR]', err)
     res.status(500).json({ error: 'Failed to verify OTP' })
   }
 })

@@ -206,7 +206,10 @@ authRouter.post('/forgot-password', async (req: Request, res: Response) => {
       used: false
     })
 
-    await sendOtpEmail(email, user.name, otp)
+    // Non-blocking — respond immediately, send email in background
+    sendOtpEmail(email, user.name, otp).catch(err =>
+      console.error('[OTP EMAIL ERROR]', err)
+    )
 
     res.json({ message: 'If this email is registered, an OTP has been sent.' })
   } catch {

@@ -148,7 +148,7 @@ export default function Checkout() {
               </div>
 
               <ul className="mt-5 space-y-1.5 text-sm text-slate-400">
-                {['Lifetime access', 'Certificate on completion', 'Practice quizzes', 'HD video lessons'].map(f => (
+                {['1 year access', 'Certificate on completion', 'Practice quizzes', 'HD video lessons'].map(f => (
                   <li key={f} className="flex items-center gap-2">
                     <svg className="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />

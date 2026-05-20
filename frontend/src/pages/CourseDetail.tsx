@@ -131,7 +131,7 @@ export default function CourseDetail() {
 
                 <ul className="mt-4 space-y-2 text-sm text-gray-500 dark:text-slate-400">
                   {[
-                    'Lifetime access',
+                    '1 year access',
                     'Certificate on completion',
                     'Practice quizzes included'
                   ].map(item => (

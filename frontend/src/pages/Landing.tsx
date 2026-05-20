@@ -49,8 +49,8 @@ const features = [
           d="M13 10V3L4 14h7v7l9-11h-7z" />
       </svg>
     ),
-    title: 'Lifetime Access',
-    desc: 'Pay once, access forever. Study at your own pace — no expiry pressure.'
+    title: '1 Year Access',
+    desc: 'Pay once, access for 1 full year. Study at your own pace with no rush.'
   },
   {
     icon: (

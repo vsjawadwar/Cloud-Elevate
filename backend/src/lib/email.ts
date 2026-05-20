@@ -1,27 +1,15 @@
-import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 
-const configured = !!(process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD)
-
-const transporter = configured
-  ? nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD
-      }
-    })
-  : null
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 async function send(to: string, subject: string, html: string) {
-  if (!transporter) {
+  if (!resend) {
     console.log(`[EMAIL SKIPPED] To: ${to} | Subject: ${subject}`)
     return
   }
   try {
-    await transporter.sendMail({
-      from: `"Cloud Elevate" <${process.env.GMAIL_USER}>`,
+    await resend.emails.send({
+      from: 'Cloud Elevate <noreply@thecloudelevate.in>',
       to,
       subject,
       html

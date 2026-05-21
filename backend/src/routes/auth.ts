@@ -193,17 +193,19 @@ authRouter.post('/forgot-password', async (req: Request, res: Response) => {
       return res.json({ message: 'If this email is registered, an OTP has been sent.' })
     }
 
-    const otp       = Math.floor(100000 + Math.random() * 900000).toString()
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
+    const cleanEmail = email.toLowerCase().trim()
+    const otp        = Math.floor(100000 + Math.random() * 900000).toString()
+    const expiresAt  = new Date(Date.now() + 10 * 60 * 1000).toISOString()
 
-    // Remove any existing OTPs for this email
-    await supabase.from('password_reset_otps').delete().eq('email', email)
+    // Remove any existing OTPs for this email (use cleaned email so casing differences don't leave stale rows)
+    await supabase.from('password_reset_otps').delete().eq('email', cleanEmail)
 
     await supabase.from('password_reset_otps').insert({
-      email: email.toLowerCase().trim(),
+      email:      cleanEmail,
       otp,
       expires_at: expiresAt,
-      used: false
+      used:       false,
+      created_at: new Date().toISOString()
     })
 
     // Non-blocking — respond immediately, send email in background
@@ -233,14 +235,14 @@ authRouter.post('/verify-reset-otp', async (req: Request, res: Response) => {
       .select('*')
       .eq('email', cleanEmail)
       .eq('used', false)
-      .order('created_at', { ascending: false })
+      .order('expires_at', { ascending: false })
       .limit(1)
       .single()
 
     console.log(`[OTP VERIFY] record=${JSON.stringify(record)} error=${JSON.stringify(dbError)}`)
 
     if (!record) return res.status(400).json({ error: 'Invalid OTP. Please check and try again.' })
-    if (String(record.otp) !== cleanOtp) return res.status(400).json({ error: 'Invalid OTP. Please check and try again.' })
+    if (String(record.otp).trim() !== cleanOtp) return res.status(400).json({ error: 'Invalid OTP. Please check and try again.' })
     if (new Date(record.expires_at) < new Date()) {
       return res.status(400).json({ error: 'OTP has expired. Please request a new one.' })
     }
@@ -269,11 +271,11 @@ authRouter.post('/reset-password', async (req: Request, res: Response) => {
       .select('*')
       .eq('email', email.toLowerCase().trim())
       .eq('used', false)
-      .order('created_at', { ascending: false })
+      .order('expires_at', { ascending: false })
       .limit(1)
       .single()
 
-    if (!record || String(record.otp) !== otp.toString().trim()) {
+    if (!record || String(record.otp).trim() !== otp.toString().trim()) {
       return res.status(400).json({ error: 'Invalid or expired OTP.' })
     }
     if (new Date(record.expires_at) < new Date()) {

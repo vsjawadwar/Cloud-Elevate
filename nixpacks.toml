@@ -1,5 +1,0 @@
-[phases.install]
-cmds = ["npm install --workspace=backend --workspace=shared"]
-
-[phases.build]
-cmds = ["cd backend && npm run build"]

@@ -13,8 +13,8 @@ A full-stack LMS (Learning Management System) built for selling and delivering G
 | Payments | Razorpay |
 | Video | Bunny.net (CDN + Stream) |
 | Email | Resend |
-| Deploy (FE) | Vercel |
-| Deploy (BE) | Render.com |
+| Deploy (FE) | Vercel (SPA rewrite via `frontend/vercel.json`) |
+| Deploy (BE) | Railway (Dockerfile, Node 20-alpine) |
 
 ## 📁 Project Structure
 
@@ -135,14 +135,14 @@ npm run dev:backend    # http://localhost:4000
 # Add environment variables in Vercel dashboard
 ```
 
-### Backend → Render.com
+### Backend → Railway
 ```bash
-# Connect GitHub repo to Render
-# Set root directory: backend
-# Build command: npm run build
-# Start command: npm start
-# Add environment variables in Render dashboard
+# Connect GitHub repo to Railway
+# Build: uses Dockerfile at repo root (multi-stage, Node 20-alpine)
+# Start: node backend/dist/index.js (set in railway.json deploy.startCommand)
+# Add environment variables in Railway service settings
 ```
+See **APPLICATION_GUIDE.md → Section 3** for the full env-var list.
 
 ## 📄 License
 Private — Cloud Elevate. All rights reserved.

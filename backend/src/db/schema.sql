@@ -181,6 +181,17 @@ create table password_reset_otps (
   created_at timestamptz default now()
 );
 
+-- ── Completion Email Dedup ───────────────────────
+-- One row per (user, module|course) prevents duplicate completion emails
+create table completion_emails (
+  id      uuid primary key default gen_random_uuid(),
+  user_id uuid not null references users(id) on delete cascade,
+  type    text not null check (type in ('module','course')),
+  ref_id  uuid not null,
+  sent_at timestamptz default now(),
+  unique(user_id, type, ref_id)
+);
+
 -- ═══════════════════════════════════════════════
 -- INDEXES — for fast queries
 -- ═══════════════════════════════════════════════

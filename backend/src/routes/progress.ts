@@ -43,6 +43,15 @@ progressRouter.post('/save', authenticate, async (req: AuthRequest, res: Respons
   }
 })
 
+// Returns true if this insert claimed the slot (first time), false if a row already existed.
+async function claimEmailSlot(userId: string, type: 'module' | 'course', refId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('completion_emails')
+    .insert({ user_id: userId, type, ref_id: refId })
+  // 23505 = unique violation → already sent
+  return !error
+}
+
 async function checkModuleCompletion(userId: string, userEmail: string, lessonId: string) {
   const { data: lessonInfo } = await supabase
     .from('lessons')
@@ -77,36 +86,42 @@ async function checkModuleCompletion(userId: string, userEmail: string, lessonId
     .eq('id', userId)
     .single()
 
-  if (user && mod?.title && course?.title && course?.id) {
+  if (!user || !mod?.id || !mod?.title || !course?.title || !course?.id) return
+
+  // Dedup: only send module email if we successfully claim the slot
+  if (await claimEmailSlot(userId, 'module', mod.id)) {
     await sendModuleCompletionEmail(userEmail, user.name, mod.title, course.title, course.id)
+  }
 
-    // Check if entire course is now complete
-    const { data: allCourseLessons } = await supabase
-      .from('lessons')
-      .select('id, modules!inner(course_id)')
-      .eq('modules.course_id', course.id)
+  // Check if entire course is now complete
+  const { data: allCourseLessons } = await supabase
+    .from('lessons')
+    .select('id, modules!inner(course_id)')
+    .eq('modules.course_id', course.id)
 
-    if (allCourseLessons?.length) {
-      const { data: allCompleted } = await supabase
-        .from('lesson_progress')
-        .select('lesson_id')
-        .eq('user_id', userId)
-        .eq('completed', true)
-        .in('lesson_id', allCourseLessons.map((l: any) => l.id))
+  if (!allCourseLessons?.length) return
 
-      if (allCompleted?.length === allCourseLessons.length) {
-        const { data: enrollment } = await supabase
-          .from('enrollments')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('course_id', course.id)
-          .single()
+  const { data: allCompleted } = await supabase
+    .from('lesson_progress')
+    .select('lesson_id')
+    .eq('user_id', userId)
+    .eq('completed', true)
+    .in('lesson_id', allCourseLessons.map((l: any) => l.id))
 
-        if (enrollment) {
-          await sendCourseCompletionEmail(userEmail, user.name, course.title, enrollment.id)
-        }
-      }
-    }
+  if (allCompleted?.length !== allCourseLessons.length) return
+
+  const { data: enrollment } = await supabase
+    .from('enrollments')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('course_id', course.id)
+    .single()
+
+  if (!enrollment) return
+
+  // Dedup: only send course email if we successfully claim the slot
+  if (await claimEmailSlot(userId, 'course', course.id)) {
+    await sendCourseCompletionEmail(userEmail, user.name, course.title, enrollment.id)
   }
 }
 

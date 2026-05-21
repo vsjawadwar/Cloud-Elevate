@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { api } from '@/lib/api'
-import { useAuthStore } from '@/lib/store/authStore'
 import Navbar from '@/components/Navbar'
 
 interface CertData {
@@ -13,39 +12,33 @@ interface CertData {
 
 export default function Certificate() {
   const { enrollmentId }              = useParams<{ enrollmentId: string }>()
-  const { user }                      = useAuthStore()
   const certRef                       = useRef<HTMLDivElement>(null)
   const [cert, setCert]               = useState<CertData | null>(null)
   const [loading, setLoading]         = useState(true)
   const [error, setError]             = useState('')
 
   useEffect(() => {
-    // Fetch all courses, find the enrollment, verify 100% completion
-    api.get('/api/courses').then(async r => {
-      const allCourses = r.data.courses || []
+    if (!enrollmentId) { setError('Invalid certificate link.'); setLoading(false); return }
 
-      // Find which course this enrollment belongs to by checking each
-      for (const course of allCourses) {
-        const enrollRes = await api.get(`/api/courses/${course.id}/enrolled`)
-        if (enrollRes.data.enrolled && enrollRes.data.enrollment?.id === enrollmentId) {
-          const progRes = await api.get(`/api/progress/course/${course.id}`)
-          if (progRes.data.percentage < 100) {
-            setError('Complete all lessons to unlock your certificate.')
-          } else {
-            setCert({
-              studentName: user?.name || 'Student',
-              courseName:  course.title,
-              enrolledAt:  enrollRes.data.enrollment.enrolled_at,
-              courseId:    course.id
-            })
-          }
-          return
+    api.get(`/api/courses/enrollments/${enrollmentId}/certificate`)
+      .then(r => {
+        const d = r.data
+        if (d.percentage < 100) {
+          setError('Complete all lessons to unlock your certificate.')
+        } else {
+          setCert({
+            studentName: d.studentName,
+            courseName:  d.courseName,
+            enrolledAt:  d.enrolledAt,
+            courseId:    d.courseId
+          })
         }
-      }
-      setError('Enrollment not found.')
-    }).catch(() => setError('Failed to load certificate.'))
+      })
+      .catch(err => {
+        setError(err.response?.data?.error || 'Failed to load certificate.')
+      })
       .finally(() => setLoading(false))
-  }, [enrollmentId, user])
+  }, [enrollmentId])
 
   const handlePrint = () => window.print()
 

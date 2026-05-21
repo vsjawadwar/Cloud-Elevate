@@ -36,7 +36,6 @@ const termsBlock = `
     <ul style="color:#94a3b8;font-size:12px;margin:0;padding-left:16px;line-height:2">
       <li>This course is licensed for <strong style="color:#e2e8f0">your personal use only</strong></li>
       <li>Do not share your login credentials with anyone</li>
-      <li>Do not share course content with anyone</li>
       <li>Your registered email is displayed as a <strong style="color:#e2e8f0">live watermark</strong> on every video to deter misuse</li>
       <li>Sharing or misuse will result in <strong style="color:#fca5a5">immediate account suspension</strong></li>
     </ul>

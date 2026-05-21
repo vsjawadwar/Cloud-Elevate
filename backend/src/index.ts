@@ -73,13 +73,7 @@ app.use(errorHandler)
 
 // ── Start ─────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`
-  ╔═══════════════════════════════════════╗
-  ║   Cloud Elevate API                   ║
-  ║   Running on http://localhost:${PORT}   ║
-  ║   Environment: ${process.env.NODE_ENV}            ║
-  ╚═══════════════════════════════════════╝
-  `)
+  console.log(`Cloud Elevate API listening on port ${PORT} | env=${process.env.NODE_ENV || 'development'}`)
 })
 
 export default app

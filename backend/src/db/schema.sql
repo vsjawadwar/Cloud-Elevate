@@ -171,6 +171,16 @@ create table quiz_answers (
   selected_option_id uuid references options(id)
 );
 
+-- ── Password Reset OTPs ──────────────────────────
+create table password_reset_otps (
+  id         uuid primary key default gen_random_uuid(),
+  email      text not null,
+  otp        text not null,
+  used       boolean default false,
+  expires_at timestamptz not null,
+  created_at timestamptz default now()
+);
+
 -- ═══════════════════════════════════════════════
 -- INDEXES — for fast queries
 -- ═══════════════════════════════════════════════
@@ -184,6 +194,7 @@ create index idx_watch_logs_lesson    on video_watch_logs(lesson_id);
 create index idx_quiz_attempts_user   on quiz_attempts(user_id);
 create index idx_questions_quiz       on questions(quiz_id);
 create index idx_options_question     on options(question_id);
+create index idx_password_reset_email on password_reset_otps(email);
 
 -- ═══════════════════════════════════════════════
 -- ROW LEVEL SECURITY (RLS)
